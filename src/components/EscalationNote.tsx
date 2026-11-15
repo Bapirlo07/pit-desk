@@ -1,31 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { buildEscalationNote, type TriagedTicket } from '../triage';
 
-async function copyText(text: string, fallbackEl: HTMLTextAreaElement | null): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Clipboard API can be blocked (non-HTTPS, permissions). Fall back to select + copy.
-    if (!fallbackEl) return false;
-    fallbackEl.focus();
-    fallbackEl.select();
-    try {
-      return document.execCommand('copy');
-    } catch {
-      return false;
-    }
-  }
-}
-
 interface Props {
   item: TriagedTicket;
   now: number;
   raceWeekend: boolean;
 }
 
+/** One-click copy of the escalation note, with an optional preview. */
 export function EscalationNote({ item, now, raceWeekend }: Props) {
-  const [open, setOpen] = useState(false);
+  const [show, setShow] = useState(false);
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
   const textRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,36 +17,41 @@ export function EscalationNote({ item, now, raceWeekend }: Props) {
   const note = buildEscalationNote(item.ticket, item.triage, { now, raceWeekend, problemCount: item.problemCount });
 
   useEffect(() => {
-    if (status === 'idle') return;
+    if (status !== 'copied') return;
     const t = window.setTimeout(() => setStatus('idle'), 2000);
     return () => window.clearTimeout(t);
   }, [status]);
 
-  if (!open) {
-    return (
-      <button type="button" className="btn btn-primary" onClick={() => setOpen(true)}>
-        Generate escalation note
-      </button>
-    );
-  }
+  // If copying failed, the note is shown and selected so the user can press Ctrl+C.
+  useEffect(() => {
+    if (status === 'failed') textRef.current?.select();
+  }, [status]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(note);
+      setStatus('copied');
+    } catch {
+      setShow(true);
+      setStatus('failed');
+    }
+  };
 
   return (
     <div className="note">
-      <div className="note-head">
-        <span className="label">Escalation note</span>
-        <button
-          type="button"
-          className="btn btn-primary btn-sm"
-          onClick={async () => setStatus((await copyText(note, textRef.current)) ? 'copied' : 'failed')}
-        >
-          {status === 'copied' ? 'Copied ✓' : 'Copy'}
+      <div className="note-actions">
+        <button type="button" className="btn btn-primary" onClick={copy}>
+          {status === 'copied' ? 'Copied ✓' : 'Copy escalation note'}
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={() => setShow((s) => !s)} aria-expanded={show}>
+          {show ? 'Hide note' : 'Preview note'}
         </button>
       </div>
-      <textarea ref={textRef} className="note-text" readOnly value={note} rows={18} aria-label="Escalation note text" />
-      <p className="sr-only" aria-live="polite">
-        {status === 'copied' ? 'Escalation note copied to clipboard' : status === 'failed' ? 'Copy failed, text is selected' : ''}
-      </p>
+      <p className="sr-only" aria-live="polite">{status === 'copied' ? 'Escalation note copied to clipboard' : ''}</p>
       {status === 'failed' && <p className="error">Couldn't copy automatically. The text is selected, press Ctrl+C.</p>}
+      {show && (
+        <textarea ref={textRef} className="note-text" readOnly value={note} rows={18} aria-label="Escalation note text" />
+      )}
     </div>
   );
 }

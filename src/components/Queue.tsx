@@ -4,9 +4,8 @@ import { PriorityBadge } from './PriorityBadge';
 interface Props {
   queue: TriagedTicket[];
   now: number;
-  raceWeekend: boolean;
   onOpen: (id: string) => void;
-  onStartTutorial: () => void;
+  onLoadDemo: () => void;
 }
 
 function QueueItem({ item, now, onOpen }: { item: TriagedTicket; now: number; onOpen: (id: string) => void }) {
@@ -43,7 +42,7 @@ function QueueItem({ item, now, onOpen }: { item: TriagedTicket; now: number; on
   );
 }
 
-export function Queue({ queue, now, raceWeekend, onOpen, onStartTutorial }: Props) {
+export function Queue({ queue, now, onOpen, onLoadDemo }: Props) {
   const open = queue.filter((q) => q.ticket.status === 'open');
   const resolved = queue
     .filter((q) => q.ticket.status === 'resolved')
@@ -51,10 +50,10 @@ export function Queue({ queue, now, raceWeekend, onOpen, onStartTutorial }: Prop
   const counts = [1, 2, 3, 4].map((p) => open.filter((q) => q.triage.priority.priority === p).length);
 
   return (
-    <section className="panel queue-panel" aria-labelledby="queue-heading" data-tour="queue">
+    <section className="panel queue-panel" aria-labelledby="queue-heading">
       <div className="queue-head">
         <h2 id="queue-heading" className="panel-title">
-          Live queue <span className="count">{open.length} open</span>
+          Queue <span className="count">{open.length} open</span>
         </h2>
         <div className="queue-summary" aria-label="Open tickets by priority">
           {counts.map((c, i) => (
@@ -62,16 +61,17 @@ export function Queue({ queue, now, raceWeekend, onOpen, onStartTutorial }: Prop
           ))}
         </div>
       </div>
-      {raceWeekend && (
-        <p className="race-banner">Race weekend ON: Mission Control and Trackside tickets are raised one priority level.</p>
-      )}
-
       {open.length === 0 ? (
         <div className="empty">
-          <p>No open tickets.</p>
-          <p className="muted">Log one on the left, or press <b>Load race-weekend demo</b>.</p>
-          <button type="button" className="btn btn-secondary empty-cta" onClick={onStartTutorial}>
-            New here? Take the 1-minute tour
+          <p><b>No open tickets.</b></p>
+          <ol className="how">
+            <li><b>Describe the problem</b> and answer three quick questions.</li>
+            <li>Pit Desk gives it a <b>priority</b>: P1 is most urgent, P4 least.</li>
+            <li><b>Open the ticket</b> to see what to do next and tick off the checks.</li>
+            <li>Still broken? <b>Copy the escalation note</b>. Fixed? <b>Mark it resolved</b>.</li>
+          </ol>
+          <button type="button" className="btn btn-secondary" onClick={onLoadDemo}>
+            Try sample tickets
           </button>
         </div>
       ) : (

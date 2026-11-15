@@ -3,11 +3,11 @@
 Pit Desk is split into three layers. Each layer only depends on the one below it.
 
 ```
-UI (src/components, src/tutorial/Tutorial.tsx, src/App.tsx)
+UI (src/components, src/App.tsx)
    ↓ calls
 Triage logic (src/triage/*): pure functions, no React, fully unit-tested
    ↓ reads
-Data (knowledge base, keyword lists, demo tickets, tutorial steps)
+Data (knowledge base, keyword lists, demo tickets)
 ```
 
 **If you want to change…**
@@ -18,7 +18,6 @@ Data (knowledge base, keyword lists, demo tickets, tutorial steps)
 | Categories, first-line checks, escalation teams | `src/triage/knowledgeBase.ts` |
 | The priority matrix or race-weekend rule | `src/triage/priority.ts` |
 | What the escalation note says | `src/triage/escalation.ts` |
-| The tutorial text | `src/tutorial/steps.ts` |
 | The demo tickets | `src/demo.ts` |
 | Colours and layout | `src/styles.css` (colour tokens are at the top) |
 
@@ -33,7 +32,7 @@ This is the "brain". Plain TypeScript functions: data in, answer out. No screen 
 | `knowledgeBase.ts` | The 8 categories plus a general fallback. Each has its keywords, ordered first-line checks, an optional caution ("don't delete the Outlook profile first") and the team to escalate to. `detectCategory()` picks the category with the most keyword hits. |
 | `priority.ts` | The ITIL-style **impact × urgency matrix**. Users affected → impact, raised one level for Mission Control/Trackside. Blocked → urgency. Matrix → P1–P4. With race weekend on, those locations go up one more level, capped at P1. It also writes the plain-English "why" reasons. |
 | `problems.ts` | `findProblemCategories()`: counts open incidents per category and returns those with 3 or more (possible underlying problem). |
-| `escalation.ts` | `buildEscalationNote()`: builds the paste-ready note (summary, priority & why, impact, user's words, steps tried / not tried, next action). Cause is always "Not yet confirmed". |
+| `escalation.ts` | `nextActions()`: the plain-English next step shown at the top of each ticket. `buildEscalationNote()`: builds the paste-ready note (summary, priority & why, impact, user's words, steps tried / not tried, next action). Cause is always "Not yet confirmed". |
 | `time.ts` | Formats "open for" ages (`12 min`, `1 h 5 min`) and timestamps. |
 | `index.ts` | The front door. `triage()` runs one ticket through all the rules. `triageQueue()` triages the whole queue, adds problem flags and sorts by priority, then age. The UI imports everything from here. |
 | `__tests__/triage.test.ts` | Unit tests: classification, categories, every matrix cell, race uplift, problem detection, queue order, escalation note contents. |
@@ -42,33 +41,24 @@ This is the "brain". Plain TypeScript functions: data in, answer out. No screen 
 
 | File | What it shows |
 | --- | --- |
-| `Header.tsx` | App name, **Race weekend** switch, **Load race-weekend demo**, **Tutorial**, and **Install app** (only shown when the browser can install it). |
-| `TicketForm.tsx` | The New ticket form, plus the **live triage preview** that updates as you type. |
-| `Queue.tsx` | The live queue: priority badge, ID, type, category, location, age, and the *Race uplift* / *Possible problem* tags. Also the priority counters and the collapsible Resolved list. |
-| `TicketDetail.tsx` | The side panel when you open a ticket: symptoms, matched keywords, the matrix and reasons, checklist, escalation, and Resolve / Reopen / Delete. Uses a native `<dialog>`, which gives focus trapping and Esc to close for free. |
+| `Header.tsx` | App name, **Race weekend** switch, **Try sample tickets**, and **Install app** (only shown when the browser can install it). |
+| `TicketForm.tsx` | The New ticket form (four plain questions), plus the **live priority preview** that updates as you type. |
+| `Queue.tsx` | The live queue: priority badge, ID, type, category, location, age, and the *Race uplift* / *Possible problem* tags. Also the priority counters, the collapsible Resolved list, and a short *how it works* guide when the queue is empty. |
+| `TicketDetail.tsx` | The side panel when you open a ticket, in working order: **What to do next**, the problem, the checklist, escalation, and a folded *Why is this P1?* (matrix, reasons, matched keywords). Footer has Resolve / Reopen / Delete. Uses a native `<dialog>`, which gives focus trapping and Esc to close for free. |
 | `PriorityMatrix.tsx` | The 3×3 grid with this ticket's cell highlighted, plus "P3 → P2" when race uplift applies. |
-| `EscalationNote.tsx` | The Generate button, the note text and **Copy** (with a fallback if the clipboard is blocked). |
+| `EscalationNote.tsx` | **Copy escalation note** in one click, plus **Preview note**. If the clipboard is blocked, it shows and selects the text instead. |
 | `PriorityBadge.tsx` | The small coloured P1–P4 label. |
-
-## Tutorial: `src/tutorial/`
-
-| File | What it does |
-| --- | --- |
-| `steps.ts` | The tour's content as data: title, text, which element to highlight (`data-tour="…"`), and whether the step needs demo tickets or an open ticket. |
-| `position.ts` | Pure maths for where the tutorial card goes: below the highlight, else above, else beside it, else docked to a screen edge. Unit-tested. |
-| `Tutorial.tsx` | The tour itself: dims the screen, spotlights the target, shows the card, and handles Next/Back/arrow keys/Esc. It's a modal `<dialog>` that re-raises itself above the ticket panel when that opens. |
-| `__tests__/tutorial.test.ts` | Tests for card placement and step data. |
 
 ## App glue: `src/`
 
 | File | What it does |
 | --- | --- |
 | `main.tsx` | Starting point. Registers the service worker and install prompt, then renders `<App/>`. |
-| `App.tsx` | Holds the state: tickets, race-weekend flag, which ticket is open, tutorial step. Connects components to each other and to storage. Priority is **calculated on every render, never stored**, so flipping race weekend re-sorts everything instantly. |
-| `storage.ts` | Saves and loads tickets, the race-weekend flag and "tutorial seen" in `localStorage`. Every read/write is in try/catch and stored data is validated, so a blocked or corrupt storage never crashes the app. |
+| `App.tsx` | Holds the state: tickets, race-weekend flag, which ticket is open. Connects components to each other and to storage. Priority is **calculated on every render, never stored**, so flipping race weekend re-sorts everything instantly. |
+| `storage.ts` | Saves and loads tickets, the race-weekend flag in `localStorage`. Every read/write is in try/catch and stored data is validated, so a blocked or corrupt storage never crashes the app. |
 | `demo.ts` | The 4 race-weekend demo tickets, created with staggered times so ages look real. |
 | `pwa.ts` | Browser-app install support: registers the service worker (website production only, skipped in the desktop app) and captures the browser's install prompt for the **Install app** button. |
-| `styles.css` | All styling. Colour tokens at the top (`--accent`, `--p1`…`--p4`), then sections for header, form, queue, drawer, matrix, tutorial and mobile breakpoints. |
+| `styles.css` | All styling. Colour tokens at the top (`--accent`, `--p1`…`--p4`), then sections for header, form, queue, drawer, matrix and mobile breakpoints. |
 
 ## App / offline files: `public/`
 

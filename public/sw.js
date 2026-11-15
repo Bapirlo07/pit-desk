@@ -5,7 +5,7 @@
  * On install it reads index.html and pre-caches the JS/CSS it references,
  * so the very first visit is enough to work offline afterwards.
  */
-const CACHE = 'pit-desk-v1';
+const CACHE = 'pit-desk-v2';
 const SCOPE = new URL(self.registration.scope).pathname; // e.g. /pit-desk/
 const CORE = ['', 'index.html', 'manifest.webmanifest', 'favicon.svg', 'icons/icon-192.png', 'icons/icon-512.png'].map(
   (p) => SCOPE + p,

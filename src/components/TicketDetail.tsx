@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { formatAge, formatDateTime, PROBLEM_THRESHOLD, type TriagedTicket } from '../triage';
+import { formatAge, formatDateTime, nextActions, PROBLEM_THRESHOLD, type TriagedTicket } from '../triage';
 import { EscalationNote } from './EscalationNote';
 import { PriorityBadge } from './PriorityBadge';
 import { PriorityMatrix } from './PriorityMatrix';
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const USERS_TEXT = { '1': '1 user', '2-10': '2–10 users', '10+': '10+ users' };
-const BLOCKED_TEXT = { yes: 'Fully blocked', partly: 'Partly blocked', no: 'Not blocked' };
+const BLOCKED_TEXT = { yes: 'No, fully blocked', partly: 'Partly', no: 'Yes, mostly' };
 
 /** Ticket detail, shown in a native <dialog> (focus trap + Esc to close for free). */
 export function TicketDetail(props: Props) {
@@ -52,6 +52,7 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
   const [resolution, setResolution] = useState('');
   const [error, setError] = useState('');
   const resolved = ticket.status === 'resolved';
+  const triedCount = ticket.stepsTried.filter((s) => t.article.checks.some((c) => c.id === s)).length;
 
   const submitResolve = (e: FormEvent) => {
     e.preventDefault();
@@ -78,48 +79,36 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
       </div>
 
       <div className="drawer-body">
-        {resolved && (
+        {resolved ? (
           <div className="callout callout-ok">
             <b>Resolved</b> {ticket.resolvedAt ? formatDateTime(ticket.resolvedAt) : ''}: {ticket.resolution}
+          </div>
+        ) : (
+          <div className="next-step">
+            <p className="label">What to do next</p>
+            {nextActions(ticket, t, problemCount).map((line) => <p key={line}>{line}</p>)}
           </div>
         )}
 
         {problemCount && !resolved && (
           <div className="callout callout-warn" role="note">
             <b>Possible underlying problem.</b> {problemCount} open {t.article.name} incidents (threshold {PROBLEM_THRESHOLD}).
-            Raise for root-cause investigation.
           </div>
         )}
 
         <section className="detail-section">
-          <h3>Symptoms <span className="muted">(user's words)</span></h3>
+          <h3>The problem</h3>
           <blockquote>{ticket.description}</blockquote>
           <dl className="facts">
-            <div><dt>Users</dt><dd>{USERS_TEXT[ticket.usersAffected]}</dd></div>
-            <div><dt>Location</dt><dd>{ticket.location}</dd></div>
-            <div><dt>Blocked</dt><dd>{BLOCKED_TEXT[ticket.blocked]}</dd></div>
+            <div><dt>People</dt><dd>{USERS_TEXT[ticket.usersAffected]}</dd></div>
+            <div><dt>Where</dt><dd>{ticket.location}</dd></div>
+            <div><dt>Can work?</dt><dd>{BLOCKED_TEXT[ticket.blocked]}</dd></div>
           </dl>
-          <p className="muted small">
-            {t.classification.defaulted
-              ? 'No type keywords matched, so it is treated as an Incident (safe default).'
-              : `Type keywords: ${t.classification.matched.map((m) => `“${m}”`).join(', ')}.`}
-            {t.categoryMatched.length > 0 && ` Category keywords: ${t.categoryMatched.map((m) => `“${m}”`).join(', ')}.`}
-          </p>
         </section>
 
-        <section className="detail-section" data-tour="matrix">
-          <h3>Why P{t.priority.priority}?</h3>
-          <div className="why">
-            <PriorityMatrix result={t.priority} />
-            <ul className="reasons">
-              {t.priority.reasons.map((r) => <li key={r}>{r}</li>)}
-            </ul>
-          </div>
-        </section>
-
-        <section className="detail-section" data-tour="checks">
+        <section className="detail-section">
           <h3>
-            First-line checks <span className="muted">({ticket.stepsTried.filter((s) => t.article.checks.some((c) => c.id === s)).length}/{t.article.checks.length} tried)</span>
+            Try these first <span className="muted">({triedCount}/{t.article.checks.length} done)</span>
           </h3>
           {t.article.caution && <p className="caution">⚠ {t.article.caution}</p>}
           <ul className="checks">
@@ -139,13 +128,31 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
           </ul>
         </section>
 
-        <section className="detail-section" data-tour="escalation">
-          <h3>Escalation</h3>
+        <section className="detail-section">
+          <h3>Still not fixed? Escalate</h3>
           <EscalationNote item={item} now={now} raceWeekend={raceWeekend} />
+        </section>
+
+        <section className="detail-section">
+          <details className="why-details">
+            <summary>Why is this P{t.priority.priority}?</summary>
+            <div className="why">
+              <PriorityMatrix result={t.priority} />
+              <ul className="reasons">
+                {t.priority.reasons.map((r) => <li key={r}>{r}</li>)}
+              </ul>
+            </div>
+            <p className="muted small">
+              {t.classification.defaulted
+                ? 'No type keywords matched, so it is treated as an Incident (safe default).'
+                : `Type keywords: ${t.classification.matched.map((m) => `“${m}”`).join(', ')}.`}
+              {t.categoryMatched.length > 0 && ` Category keywords: ${t.categoryMatched.map((m) => `“${m}”`).join(', ')}.`}
+            </p>
+          </details>
         </section>
       </div>
 
-      <div className="drawer-foot" data-tour="detail-actions">
+      <div className="drawer-foot">
         {mode === 'resolving' ? (
           <form className="resolve-form" onSubmit={submitResolve}>
             <label htmlFor="resolution" className="sr-only">Resolution note</label>
@@ -153,7 +160,7 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
               id="resolution"
               autoFocus
               value={resolution}
-              placeholder="One-line resolution, e.g. Reset password, user logged in"
+              placeholder="What fixed it? e.g. Reset password, user logged in"
               onChange={(e) => { setResolution(e.target.value); setError(''); }}
               aria-invalid={error ? true : undefined}
             />

@@ -5,10 +5,9 @@ interface Props {
   raceWeekend: boolean;
   onToggleRaceWeekend: () => void;
   onLoadDemo: () => void;
-  onStartTutorial: () => void;
 }
 
-export function Header({ raceWeekend, onToggleRaceWeekend, onLoadDemo, onStartTutorial }: Props) {
+export function Header({ raceWeekend, onToggleRaceWeekend, onLoadDemo }: Props) {
   // Only shows when the browser says the app can be installed (Chrome/Edge, Android).
   const installable = useSyncExternalStore(subscribeInstall, canInstall, () => false) && !isRunningAsApp();
 
@@ -31,7 +30,7 @@ export function Header({ raceWeekend, onToggleRaceWeekend, onLoadDemo, onStartTu
           aria-checked={raceWeekend}
           className={`switch ${raceWeekend ? 'is-on' : ''}`}
           onClick={onToggleRaceWeekend}
-          data-tour="race-toggle"
+          title="When on, Mission Control and Trackside tickets jump up one priority level"
         >
           <span className="switch-track" aria-hidden="true">
             <span className="switch-thumb" />
@@ -39,10 +38,7 @@ export function Header({ raceWeekend, onToggleRaceWeekend, onLoadDemo, onStartTu
           <span>Race weekend</span>
         </button>
         <button type="button" className="btn btn-secondary" onClick={onLoadDemo}>
-          Load race-weekend demo
-        </button>
-        <button type="button" className="btn btn-ghost" onClick={onStartTutorial} data-tour="tutorial-button">
-          Tutorial
+          Try sample tickets
         </button>
         {installable && (
           <button type="button" className="btn btn-ghost btn-install" onClick={() => void promptInstall()}>

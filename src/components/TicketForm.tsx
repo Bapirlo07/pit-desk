@@ -7,8 +7,9 @@ interface Props {
   onSubmit: (input: TicketInput) => void;
 }
 
-const USERS_LABEL: Record<UsersAffected, string> = { '1': '1', '2-10': '2–10', '10+': '10+' };
-const BLOCKED_LABEL: Record<Blocked, string> = { yes: 'Yes', partly: 'Partly', no: 'No' };
+const USERS_LABEL: Record<UsersAffected, string> = { '1': 'Just one', '2-10': '2–10', '10+': 'More than 10' };
+// Asked the friendly way round: "can they still work?" No = fully blocked.
+const BLOCKED_LABEL: Record<Blocked, string> = { yes: 'No, stopped', partly: 'Partly', no: 'Yes, mostly' };
 
 function Segmented<T extends string>(props: {
   legend: string;
@@ -62,11 +63,11 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
   };
 
   return (
-    <section className="panel form-panel" aria-labelledby="new-ticket-heading" data-tour="form">
+    <section className="panel form-panel" aria-labelledby="new-ticket-heading">
       <h2 id="new-ticket-heading" className="panel-title">New ticket</h2>
       <form onSubmit={submit} noValidate>
         <div className="field">
-          <label htmlFor={descId} className="label">What's happening? <span className="muted">(user's words)</span></label>
+          <label htmlFor={descId} className="label">What's the problem? <span className="muted">(in the user's words)</span></label>
           <textarea
             id={descId}
             rows={4}
@@ -80,7 +81,7 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
         </div>
 
         <Segmented
-          legend="Users affected"
+          legend="How many people are affected?"
           name="users"
           options={USERS_AFFECTED}
           labels={USERS_LABEL}
@@ -89,7 +90,7 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
         />
 
         <div className="field">
-          <label htmlFor={locId} className="label">Location</label>
+          <label htmlFor={locId} className="label">Where are they?</label>
           <select
             id={locId}
             value={form.location}
@@ -102,7 +103,7 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
         </div>
 
         <Segmented
-          legend="Is work fully blocked?"
+          legend="Can they still work?"
           name="blocked"
           options={BLOCKED}
           labels={BLOCKED_LABEL}
@@ -110,9 +111,10 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
           onChange={(blocked) => setForm({ ...form, blocked })}
         />
 
-        <div className="preview" aria-live="polite" data-tour="preview">
+        <div className="preview" aria-live="polite">
           {preview ? (
             <>
+              <span className="muted">This will be</span>
               <PriorityBadge priority={preview.priority.priority} />
               <span>{preview.classification.type}</span>
               <span className="dot" aria-hidden="true">·</span>
@@ -120,7 +122,7 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
               {preview.priority.upliftApplied && <span className="tag tag-accent">Race uplift</span>}
             </>
           ) : (
-            <span className="muted">Live triage preview appears as you type.</span>
+            <span className="muted">Start typing and the priority appears here.</span>
           )}
         </div>
 

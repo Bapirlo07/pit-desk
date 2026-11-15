@@ -2,7 +2,6 @@ import { BLOCKED, LOCATIONS, USERS_AFFECTED, type Ticket } from './triage';
 
 const TICKETS_KEY = 'pit-desk:tickets:v1';
 const RACE_KEY = 'pit-desk:race-weekend:v1';
-const TUTORIAL_KEY = 'pit-desk:tutorial-seen:v1';
 
 /** Storage can throw (private mode, blocked site data, quota). The app must still work. */
 function read(key: string): string | null {
@@ -57,12 +56,4 @@ export function loadRaceWeekend(): boolean {
 
 export function saveRaceWeekend(on: boolean): void {
   write(RACE_KEY, String(on));
-}
-
-export function loadTutorialSeen(): boolean {
-  return read(TUTORIAL_KEY) === 'true';
-}
-
-export function saveTutorialSeen(): void {
-  write(TUTORIAL_KEY, 'true');
 }

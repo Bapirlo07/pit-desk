@@ -9,7 +9,7 @@ export { KNOWLEDGE_BASE, detectCategory, getArticle } from './knowledgeBase';
 export { PRIORITY_MATRIX, LEVELS, RACE_CRITICAL_LOCATIONS, calculatePriority } from './priority';
 export { classifyType, PROBLEM_THRESHOLD } from './rules';
 export { findProblemCategories } from './problems';
-export { buildEscalationNote } from './escalation';
+export { buildEscalationNote, nextActions } from './escalation';
 export { formatAge, formatDateTime } from './time';
 
 export interface Triage {

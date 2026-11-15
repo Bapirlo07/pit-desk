@@ -11,7 +11,16 @@ It then writes a factual **escalation note** you can paste into a ticketing syst
 **Live demo:** https://bapirlo07.github.io/pit-desk/
 **Desktop app (Windows / macOS / Linux):** https://github.com/Bapirlo07/pit-desk/releases/latest
 
-It also installs from the browser and works offline, and has a built-in **guided tutorial**.
+It also installs from the browser and works offline.
+
+## How to use it (30 seconds)
+
+1. **Describe the problem** in the user's words and answer three questions: how many people, where, and can they still work?
+2. Pit Desk gives it a **priority**: P1 is most urgent, P4 least. The queue keeps the most urgent ticket on top.
+3. **Open the ticket**. The green **What to do next** box tells you the next move. Tick off the checks as you try them.
+4. Still broken? **Copy escalation note** and paste it into your ticketing system. Fixed? **Mark resolved**.
+
+Turn on **Race weekend** to raise Mission Control and Trackside tickets one level. Press **Try sample tickets** to see it in action.
 
 ![Live queue after loading the race-weekend demo](docs/queue.jpg)
 ![Ticket detail: priority matrix, reasons and first-line checks](docs/ticket-detail.jpg)
@@ -28,10 +37,10 @@ I built this to practise the core skill of a first-line service desk: **triage b
 - **Race weekend toggle**: Mission Control and Trackside tickets go up one level (never above P1). The queue re-prioritises the moment you flip it.
 - **Possible problem detection**: 3+ open incidents in the same category are flagged *"possible underlying problem, raise for root-cause investigation"*.
 - **Knowledge base of first-line checks** for 8 categories plus a general fallback. Ticked checks are saved as "steps tried".
-- **Escalation note generator** with one-click copy.
+- **Escalation note** with one-click copy, and an optional preview.
 - **Live queue** sorted by priority, then age, colour-coded P1 red → P4 grey. Resolve (requires a one-line note), reopen, or delete.
-- **Race-weekend demo** button loads four realistic tickets.
-- **Guided tutorial**: an 11-step walkthrough that spotlights each part of the app. Starts on first visit; replay it from the **Tutorial** button.
+- **Try sample tickets** loads four realistic race-weekend tickets.
+- **Self-explanatory screens**: plain-language questions, a *What to do next* box on every ticket, and the detailed priority maths folded under *Why is this P1?*.
 - **Installable app (PWA)**: install it to the desktop or phone home screen. It opens in its own window and works **offline** after the first visit.
 - Saved in `localStorage` (and still works if storage is blocked). Keyboard accessible. Works on a laptop and a phone.
 
@@ -112,7 +121,6 @@ src/
 │  ├─ escalation.ts      # escalation note builder
 │  ├─ index.ts           # triage() and triageQueue(): sorting and flags
 │  └─ __tests__/         # Vitest unit tests
-├─ tutorial/             # guided tour: steps (data), card positioning (pure), component
 ├─ components/           # React UI
 ├─ storage.ts            # localStorage, wrapped in try/catch
 ├─ demo.ts               # race-weekend demo tickets
