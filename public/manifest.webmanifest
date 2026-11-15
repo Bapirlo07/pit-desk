@@ -1,0 +1,16 @@
+{
+  "name": "Pit Desk – Race Weekend Ticket Triage",
+  "short_name": "Pit Desk",
+  "description": "Race-weekend IT service desk triage: impact × urgency priority, first-line checks and escalation notes.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f1215",
+  "theme_color": "#111417",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
