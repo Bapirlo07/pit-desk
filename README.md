@@ -22,8 +22,16 @@ It also installs from the browser and works offline.
 
 Turn on **Race weekend** to raise Mission Control and Trackside tickets one level. Press **Try sample tickets** to see it in action.
 
-![Live queue after loading the race-weekend demo](docs/queue.jpg)
-![Ticket detail: priority matrix, reasons and first-line checks](docs/ticket-detail.jpg)
+![Queue after loading the sample tickets](docs/queue.jpg)
+![Ticket panel: what to do next, the problem and first-line checks](docs/ticket-detail.jpg)
+
+**On a phone:**
+
+<p>
+  <img src="docs/mobile-queue.jpg" alt="Queue on a phone, sorted P1 to P4" width="280">
+  &nbsp;
+  <img src="docs/mobile-ticket-detail.jpg" alt="Ticket panel on a phone, with What to do next at the top" width="280">
+</p>
 
 ## Why I built it
 
