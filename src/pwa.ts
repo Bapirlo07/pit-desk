@@ -9,12 +9,18 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+/** True inside the Tauri desktop app (it injects this global). */
+export function isDesktopApp(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+}
+
 let deferredPrompt: BeforeInstallPromptEvent | null = null;
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 
 export function registerServiceWorker(): void {
-  if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+  // The desktop app already has its files locally, so it doesn't need offline caching.
+  if (!import.meta.env.PROD || isDesktopApp() || !('serviceWorker' in navigator)) return;
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })

@@ -67,7 +67,7 @@ This is the "brain". Plain TypeScript functions: data in, answer out. No screen 
 | `App.tsx` | Holds the state: tickets, race-weekend flag, which ticket is open, tutorial step. Connects components to each other and to storage. Priority is **calculated on every render, never stored**, so flipping race weekend re-sorts everything instantly. |
 | `storage.ts` | Saves and loads tickets, the race-weekend flag and "tutorial seen" in `localStorage`. Every read/write is in try/catch and stored data is validated, so a blocked or corrupt storage never crashes the app. |
 | `demo.ts` | The 4 race-weekend demo tickets, created with staggered times so ages look real. |
-| `pwa.ts` | App install support: registers the service worker (production only) and captures the browser's install prompt for the **Install app** button. |
+| `pwa.ts` | Browser-app install support: registers the service worker (website production only, skipped in the desktop app) and captures the browser's install prompt for the **Install app** button. |
 | `styles.css` | All styling. Colour tokens at the top (`--accent`, `--p1`…`--p4`), then sections for header, form, queue, drawer, matrix, tutorial and mobile breakpoints. |
 
 ## App / offline files: `public/`
@@ -81,16 +81,30 @@ Copied as-is into the build.
 | `icons/` | App icons (192, 512, Apple touch). |
 | `favicon.svg` | Browser tab icon. |
 
+## Desktop app: `src-tauri/`
+
+The desktop app is the same web app inside a native window (Tauri). You normally never touch these files.
+
+| File | What it does |
+| --- | --- |
+| `tauri.conf.json` | The main desktop settings: app name, window size, icons, installer types, and a strict content security policy. Its version is read from `package.json`. |
+| `src/main.rs` | The tiny Rust program that opens the window and loads the built web app. No native features are exposed. |
+| `Cargo.toml` | Rust dependencies (just Tauri) and size-optimised release settings. |
+| `build.rs` | Standard Tauri build hook. |
+| `capabilities/default.json` | Permissions: only the core window permissions, with no file, shell or network access. |
+| `icons/` | Desktop icons in every format (`.ico` for Windows, `.icns` for macOS, PNGs for Linux), generated from `scripts/icon-1024.png` with `npx tauri icon`. |
+
 ## Config and project files
 
 | File | What it does |
 | --- | --- |
 | `index.html` | The single HTML page. Links the manifest, icons and `src/main.tsx`. |
-| `vite.config.ts` | Build tool config. `base: '/pit-desk/'` must match the GitHub repo name. Also the Vitest settings. |
+| `vite.config.ts` | Build tool config. `base` is `/pit-desk/` for the website (must match the repo name) and `./` when Tauri builds the desktop app. Also the Vitest settings. |
 | `package.json` | Dependencies and scripts: `dev`, `build`, `test`, `preview`. |
 | `tsconfig*.json` | TypeScript settings (strict mode). `tsconfig.app.json` covers `src/`, `tsconfig.node.json` covers the Vite config. |
-| `.github/workflows/deploy.yml` | On every push to `main`: install → test → build → publish to GitHub Pages. If tests fail, nothing is deployed. |
-| `scripts/icon.svg` | Source artwork for the app icons, plus a README with the command to regenerate them. |
+| `.github/workflows/deploy.yml` | On every push to `main`: install → test → build → publish the **website** to GitHub Pages. If tests fail, nothing is deployed. |
+| `.github/workflows/release.yml` | On a version tag (`v1.0.0`): builds the **desktop installers** on Windows, macOS and Linux and publishes them as a GitHub Release. |
+| `scripts/icon.svg`, `icon-1024.png` | Source artwork for all app icons (web and desktop), plus a README with the commands to regenerate them. |
 | `docs/` | README screenshots and this guide. |
 | `.gitignore` | Keeps `node_modules/` and `dist/` out of git. |
 

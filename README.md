@@ -8,7 +8,10 @@
 
 It then writes a factual **escalation note** you can paste into a ticketing system.
 
-**Live demo:** https://bapirlo07.github.io/pit-desk/. It's also an **installable app that works offline**, and has a built-in **guided tutorial**.
+**Live demo:** https://bapirlo07.github.io/pit-desk/
+**Desktop app (Windows / macOS / Linux):** https://github.com/Bapirlo07/pit-desk/releases/latest
+
+It also installs from the browser and works offline, and has a built-in **guided tutorial**.
 
 ![Live queue after loading the race-weekend demo](docs/queue.jpg)
 ![Ticket detail: priority matrix, reasons and first-line checks](docs/ticket-detail.jpg)
@@ -32,7 +35,23 @@ I built this to practise the core skill of a first-line service desk: **triage b
 - **Installable app (PWA)**: install it to the desktop or phone home screen. It opens in its own window and works **offline** after the first visit.
 - Saved in `localStorage` (and still works if storage is blocked). Keyboard accessible. Works on a laptop and a phone.
 
-## Install it as an app
+## Desktop app
+
+Download the installer for your system from **[Releases](https://github.com/Bapirlo07/pit-desk/releases/latest)**:
+
+| System | File |
+| --- | --- |
+| Windows | `…_x64-setup.exe` (or `.msi`) |
+| macOS (Intel + Apple Silicon) | `…_universal.dmg` |
+| Linux | `.AppImage` (any distro), `.deb` or `.rpm` |
+
+The installers aren't code-signed (that needs paid certificates), so the first launch shows a warning:
+- **Windows:** *Windows protected your PC* → **More info** → **Run anyway**.
+- **macOS:** right-click the app → **Open** → **Open**.
+
+The desktop app is built with [Tauri](https://tauri.app). It's the same React code as the website, shown in the operating system's own web view, so the installer is only a few MB. It has no file, shell or network permissions.
+
+## Install it from the browser instead
 
 Open the live demo, then:
 - **Chrome / Edge (Windows, macOS, Linux, ChromeOS):** click **Install app** in the header, or the install icon in the address bar.
@@ -101,6 +120,7 @@ src/
 public/
 ├─ manifest.webmanifest  # makes it installable
 └─ sw.js                 # offline caching
+src-tauri/               # desktop app shell (Tauri): window, icons, installer settings
 ```
 
 Priority is **derived, not stored**. Every render re-triages the queue from the raw ticket facts, so toggling race weekend or editing rules updates everything consistently.
@@ -117,9 +137,26 @@ npm run build      # production build in dist/
 npm run preview    # serve the production build (the service worker only runs here, not in dev)
 ```
 
+### Desktop app development
+
+Needs [Rust](https://rustup.rs) plus the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS.
+
+```bash
+npm run app:dev     # opens the desktop window with live reload
+npm run app:build   # builds installers into src-tauri/target/release/bundle/
+```
+
 ## Deploy
 
-Pushing to `main` runs `.github/workflows/deploy.yml`, which tests, builds and publishes to GitHub Pages. In the repo, go to **Settings → Pages → Source** and choose **GitHub Actions** (one-time setup). The Vite `base` is `/pit-desk/`, so the repo must be named `pit-desk`.
+**Desktop installers:** bump `version` in `package.json`, then push a matching tag:
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+`.github/workflows/release.yml` builds on Windows, macOS and Linux and publishes a GitHub Release with the installers. It takes about 10–15 minutes.
+
+**Website:** pushing to `main` runs `.github/workflows/deploy.yml`, which tests, builds and publishes to GitHub Pages. In the repo, go to **Settings → Pages → Source** and choose **GitHub Actions** (one-time setup). The Vite `base` is `/pit-desk/`, so the repo must be named `pit-desk`.
 
 ## What I'd add next
 
