@@ -1,26 +1,33 @@
 # Pit Desk
 
-**Race-weekend IT service desk triage.** Log a ticket in the user's own words and Pit Desk tells you:
-- whether it's an **incident** or a **service request**
-- which **category** it falls under
-- its **priority (P1–P4)**, and why
-- the **first-line checks** to work through
+**When lots of people have computer problems at once, Pit Desk helps you decide which one to fix first, and tells you what to try.**
 
-It then writes a factual **escalation note** you can paste into a ticketing system.
+Picture the IT help desk at a motor-racing team on race weekend. The phone keeps ringing: a broken printer, a forgotten password, and then 15 engineers who can't see live data from the car. Pit Desk puts these in order, so the problem that matters most is always at the top.
 
-**Live demo:** https://bapirlo07.github.io/pit-desk/
-**Desktop app (Windows / macOS / Linux):** https://github.com/Bapirlo07/pit-desk/releases/latest
+👉 **Try it in your browser:** https://bapirlo07.github.io/pit-desk/ (nothing to install)
+💻 **Download the app (Windows / Mac / Linux):** https://github.com/Bapirlo07/pit-desk/releases/latest
 
-It also installs from the browser and works offline.
+## How to use it
 
-## How to use it (30 seconds)
+1. **Type the problem** the way the person described it, e.g. *"Trackside printer won't print"*.
+2. **Answer three quick questions:** how many people are affected, where they are, and whether they can still work.
+3. Pit Desk gives it a **priority**:
 
-1. **Describe the problem** in the user's words and answer three questions: how many people, where, and can they still work?
-2. Pit Desk gives it a **priority**: P1 is most urgent, P4 least. The queue keeps the most urgent ticket on top.
-3. **Open the ticket**. The green **What to do next** box tells you the next move. Tick off the checks as you try them.
-4. Still broken? **Copy escalation note** and paste it into your ticketing system. Fixed? **Mark resolved**.
+   | Label | Meaning |
+   | --- | --- |
+   | 🔴 **P1 Urgent** | Drop everything |
+   | 🟠 **P2 High** | Next up |
+   | 🟡 **P3 Normal** | When you're free |
+   | ⚪ **P4 Low** | Can wait |
 
-Turn on **Race weekend** to raise Mission Control and Trackside tickets one level. Press **Try sample tickets** to see it in action.
+4. **Click a ticket.** The green **What to do next** box tells you the next step, and below it is a checklist of things to try. Tick each one as you go.
+5. **Fixed?** Press **Mark as fixed**. **Still broken?** Press **Copy handover note** and send it to the expert team. It already explains the problem and what you've tried.
+
+**Race weekend switch:** turn it on during a race. Problems at **Mission Control** and **Trackside** (the people running the car) then move up one level.
+
+**Just looking?** Press **Try sample tickets** to fill it with example problems.
+
+Your tickets are saved on your own device. Nothing is sent anywhere.
 
 ![Queue after loading the sample tickets](docs/queue.jpg)
 ![Ticket panel: what to do next, the problem and first-line checks](docs/ticket-detail.jpg)
@@ -35,6 +42,8 @@ Turn on **Race weekend** to raise Mission Control and Trackside tickets one leve
 
 ## Why I built it
 
+*(The rest of this page is the technical detail.)*
+
 I built this to practise the core skill of a first-line service desk: **triage by impact and urgency**. Speed matters on a race weekend. A ticket from Mission Control while the car is on track can't wait behind a request for a second monitor. Each call has to be explainable, though: *why* is this a P1 and that a P4? Pit Desk makes the reasoning visible. It shows the ITIL matrix with the chosen cell highlighted, lists the reasons in plain English, and keeps the escalation note to facts (it never states a guessed cause).
 
 ## Features
@@ -43,12 +52,12 @@ I built this to practise the core skill of a first-line service desk: **triage b
 - **Classification by keyword rules** (`src/triage/rules.ts`). No AI, so it's predictable and explainable. The ticket shows the keywords that matched.
 - **Impact × urgency priority matrix**, with the selected cell highlighted.
 - **Race weekend toggle**: Mission Control and Trackside tickets go up one level (never above P1). The queue re-prioritises the moment you flip it.
-- **Possible problem detection**: 3+ open incidents in the same category are flagged *"possible underlying problem, raise for root-cause investigation"*.
+- **Possible problem detection**: 3+ open incidents in the same category are flagged *"Several people have this problem"*, the cue to look for a bigger underlying cause.
 - **Knowledge base of first-line checks** for 8 categories plus a general fallback. Ticked checks are saved as "steps tried".
-- **Escalation note** with one-click copy, and an optional preview.
+- **Escalation note** (shown as *Copy handover note*) with one-click copy, and an optional preview. It stays in standard IT format because it gets pasted into ticketing systems.
 - **Live queue** sorted by priority, then age, colour-coded P1 red → P4 grey. Resolve (requires a one-line note), reopen, or delete.
 - **Try sample tickets** loads four realistic race-weekend tickets.
-- **Self-explanatory screens**: plain-language questions, a *What to do next* box on every ticket, and the detailed priority maths folded under *Why is this P1?*.
+- **Written for non-technical people**: everyday words on screen (*P1 Urgent*, *Something broken* / *Request*, *Mark as fixed*), plain-English checklists with any technical command in brackets, a *What to do next* box on every ticket, and the priority maths folded under *Why is this P1?*. The screen labels live in `src/labels.ts`.
 - **Installable app (PWA)**: install it to the desktop or phone home screen. It opens in its own window and works **offline** after the first visit.
 - Saved in `localStorage` (and still works if storage is blocked). Keyboard accessible. Works on a laptop and a phone.
 

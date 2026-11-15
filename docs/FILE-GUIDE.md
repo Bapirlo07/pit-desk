@@ -20,6 +20,7 @@ Data (knowledge base, keyword lists, demo tickets)
 | What the escalation note says | `src/triage/escalation.ts` |
 | The demo tickets | `src/demo.ts` |
 | Colours and layout | `src/styles.css` (colour tokens are at the top) |
+| Everyday words shown on screen (P1 = *Urgent*, Incident = *Something broken*) | `src/labels.ts` |
 
 ## Triage logic: `src/triage/`
 
@@ -56,6 +57,7 @@ This is the "brain". Plain TypeScript functions: data in, answer out. No screen 
 | `main.tsx` | Starting point. Registers the service worker and install prompt, then renders `<App/>`. |
 | `App.tsx` | Holds the state: tickets, race-weekend flag, which ticket is open. Connects components to each other and to storage. Priority is **calculated on every render, never stored**, so flipping race weekend re-sorts everything instantly. |
 | `storage.ts` | Saves and loads tickets, the race-weekend flag in `localStorage`. Every read/write is in try/catch and stored data is validated, so a blocked or corrupt storage never crashes the app. |
+| `labels.ts` | Everyday names for IT terms: `PRIORITY_NAME` (Urgent / High / Normal / Low), `PRIORITY_HINT` (drop everything … can wait) and `TYPE_LABEL` (Something broken / Request). The logic keeps standard terms, and the screens use these. |
 | `demo.ts` | The 4 race-weekend demo tickets, created with staggered times so ages look real. |
 | `pwa.ts` | Browser-app install support: registers the service worker (website production only, skipped in the desktop app) and captures the browser's install prompt for the **Install app** button. |
 | `styles.css` | All styling. Colour tokens at the top (`--accent`, `--p1`…`--p4`), then sections for header, form, queue, drawer, matrix and mobile breakpoints. |

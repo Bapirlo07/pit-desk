@@ -41,16 +41,16 @@ export function EscalationNote({ item, now, raceWeekend }: Props) {
     <div className="note">
       <div className="note-actions">
         <button type="button" className="btn btn-primary" onClick={copy}>
-          {status === 'copied' ? 'Copied ✓' : 'Copy escalation note'}
+          {status === 'copied' ? 'Copied ✓' : 'Copy handover note'}
         </button>
         <button type="button" className="btn btn-ghost" onClick={() => setShow((s) => !s)} aria-expanded={show}>
           {show ? 'Hide note' : 'Preview note'}
         </button>
       </div>
-      <p className="sr-only" aria-live="polite">{status === 'copied' ? 'Escalation note copied to clipboard' : ''}</p>
+      <p className="sr-only" aria-live="polite">{status === 'copied' ? 'Handover note copied. Paste it into your ticket system or an email.' : ''}</p>
       {status === 'failed' && <p className="error">Couldn't copy automatically. The text is selected, press Ctrl+C.</p>}
       {show && (
-        <textarea ref={textRef} className="note-text" readOnly value={note} rows={18} aria-label="Escalation note text" />
+        <textarea ref={textRef} className="note-text" readOnly value={note} rows={18} aria-label="Handover note text" />
       )}
     </div>
   );

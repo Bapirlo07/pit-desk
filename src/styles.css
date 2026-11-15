@@ -445,10 +445,11 @@ input:focus {
 }
 .queue-summary {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 .summary-pill {
-  font-family: var(--mono);
+  white-space: nowrap;
   font-size: 12px;
   padding: 2px 8px;
   border-radius: 999px;
@@ -885,6 +886,18 @@ blockquote {
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 10px;
+}
+
+.race-banner {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 14px;
+}
+.hint {
+  margin: -4px 0 10px;
 }
 
 /* ---------- Responsive ---------- */

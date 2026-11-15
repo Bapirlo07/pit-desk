@@ -14,16 +14,18 @@ export function nextActions(ticket: Ticket, t: Triage, problemCount?: number | n
   const notTried = article.checks.filter((c) => !ticket.stepsTried.includes(c.id));
   const next: string[] = [];
   if (classification.type === 'Service request') {
-    next.push(`Fulfil as a standard service request via ${article.escalateTo}. Confirm line-manager approval first.`);
+    next.push(`This is a request, not a fault. Once their manager has approved it, pass it to ${article.escalateTo}.`);
   } else if (priority.priority === 1) {
-    next.push(`Escalate now to ${article.escalateTo} and notify the duty manager. Continue remaining checks in parallel.`);
+    next.push(`Urgent: pass this to ${article.escalateTo} now and tell the manager on duty. Keep trying the checks while you wait.`);
   } else if (notTried.length > 0) {
-    next.push(`Complete remaining first-line checks. If unresolved, escalate to ${article.escalateTo}.`);
+    next.push(`Work through the checks. If it's still not fixed, pass it to ${article.escalateTo}.`);
   } else {
-    next.push(`All first-line checks done. Escalate to ${article.escalateTo}.`);
+    next.push(`All checks done and still not fixed: pass it to ${article.escalateTo}.`);
   }
   if (problemCount) {
-    next.push(`${problemCount} open ${article.name} incidents: possible underlying problem, raise for root-cause investigation.`);
+    next.push(
+      `${problemCount} ${article.name} problems are open at once, so something bigger may be broken. Ask ${article.escalateTo} to find the cause.`,
+    );
   }
   return next;
 }

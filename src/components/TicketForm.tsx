@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from 'react';
 import { BLOCKED, LOCATIONS, USERS_AFFECTED, triage, type Blocked, type Location, type TicketInput, type UsersAffected } from '../triage';
+import { TYPE_LABEL } from '../labels';
 import { PriorityBadge } from './PriorityBadge';
 
 interface Props {
@@ -54,7 +55,7 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (form.description.trim().length < 5) {
-      setError("Describe the issue in the user's words (at least a few words).");
+      setError("Write a few words about the problem first.");
       return;
     }
     onSubmit({ ...form, description: form.description.trim() });
@@ -115,18 +116,18 @@ export function TicketForm({ raceWeekend, onSubmit }: Props) {
           {preview ? (
             <>
               <span className="muted">This will be</span>
-              <PriorityBadge priority={preview.priority.priority} />
-              <span>{preview.classification.type}</span>
+              <PriorityBadge priority={preview.priority.priority} named />
+              <span>{TYPE_LABEL[preview.classification.type]}</span>
               <span className="dot" aria-hidden="true">·</span>
               <span>{preview.article.name}</span>
-              {preview.priority.upliftApplied && <span className="tag tag-accent">Race uplift</span>}
+              {preview.priority.upliftApplied && <span className="tag tag-accent">Race weekend boost</span>}
             </>
           ) : (
             <span className="muted">Start typing and the priority appears here.</span>
           )}
         </div>
 
-        <button type="submit" className="btn btn-primary btn-block">Log ticket</button>
+        <button type="submit" className="btn btn-primary btn-block">Add ticket</button>
       </form>
     </section>
   );

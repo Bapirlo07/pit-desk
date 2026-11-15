@@ -98,7 +98,7 @@ describe('priority matrix', () => {
 
   it('explains the result in plain reasons', () => {
     const r = calculatePriority({ usersAffected: '10+', location: 'Office', blocked: 'yes' }, false);
-    expect(r.reasons.join(' ')).toContain('High impact × High urgency = P1');
+    expect(r.reasons.join(' ')).toContain('High impact + High urgency = P1');
   });
 });
 
@@ -213,15 +213,15 @@ describe('escalation note', () => {
 
   it('splits ticked and unticked checks', () => {
     const [tried, notTried] = note.split('STEPS NOT TRIED');
-    expect(tried).toContain('Confirm scope');
-    expect(tried).toContain('Ping the gateway');
+    expect(tried).toContain('Check who is affected');
+    expect(tried).toContain('reach the router');
     expect(notTried).toContain('nslookup');
-    expect(notTried).not.toContain('Ping the gateway');
+    expect(notTried).not.toContain('reach the router');
   });
 
   it('escalates P1 and flags possible problem', () => {
-    expect(note).toContain('Escalate now to Network team');
-    expect(note).toContain('possible underlying problem');
+    expect(note).toContain('pass this to the Network team now');
+    expect(note).toContain('something bigger may be broken');
   });
 
   it('never states a cause as fact', () => {
@@ -232,7 +232,7 @@ describe('escalation note', () => {
   it('routes service requests as requests', () => {
     const req = makeTicket({ description: 'Manager wants a second monitor', blocked: 'no' });
     const reqNote = buildEscalationNote(req, triage(req, false), { now: NOW, raceWeekend: false });
-    expect(reqNote).toContain('standard service request');
+    expect(reqNote).toContain('This is a request, not a fault');
     expect(reqNote).toContain('STEPS TRIED\n- None');
   });
 });

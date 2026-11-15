@@ -20,7 +20,7 @@ export function Header({ raceWeekend, onToggleRaceWeekend, onLoadDemo }: Props) 
         </svg>
         <div>
           <h1>Pit Desk</h1>
-          <p className="brand-sub">Race weekend ticket triage</p>
+          <p className="brand-sub">IT help desk: what to fix first</p>
         </div>
       </div>
       <div className="header-actions">

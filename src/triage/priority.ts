@@ -46,17 +46,17 @@ export function calculatePriority(
   const critical = RACE_CRITICAL_LOCATIONS.includes(input.location);
 
   const reasons: string[] = [];
-  const who = input.usersAffected === '1' ? '1 user' : `${input.usersAffected} users`;
+  const who = input.usersAffected === '1' ? '1 person' : `${input.usersAffected.replace('-', '–')} people`;
   const baseImpact = USERS_TO_IMPACT[input.usersAffected];
   const locationNote = !critical
     ? ''
     : baseImpact === 'High'
-      ? ` (${input.location} is race-critical, already the highest impact)`
-      : `, raised one level because ${input.location} is race-critical`;
-  reasons.push(`Impact ${impact}: ${who} affected${locationNote}.`);
-  const blockedText = { yes: 'work is fully blocked', partly: 'work is partly blocked', no: 'work is not blocked' }[input.blocked];
-  reasons.push(`Urgency ${urgency}: ${blockedText}.`);
-  reasons.push(`Matrix: ${impact} impact × ${urgency} urgency = P${basePriority}.`);
+      ? ` (${input.location} is vital to the race, but this is already the highest impact)`
+      : `, moved up a level because ${input.location} is vital to the race`;
+  reasons.push(`${who} affected${locationNote}, so impact is ${impact}.`);
+  const blockedText = { yes: 'They cannot work at all', partly: 'They can only partly work', no: 'They can still work' }[input.blocked];
+  reasons.push(`${blockedText}, so urgency is ${urgency}.`);
+  reasons.push(`${impact} impact + ${urgency} urgency = P${basePriority} (see the grid).`);
 
   let priority = basePriority;
   let upliftApplied = false;
@@ -64,9 +64,9 @@ export function calculatePriority(
     if (basePriority > 1) {
       priority = (basePriority - 1) as Priority;
       upliftApplied = true;
-      reasons.push(`Race weekend: ${input.location} raised one level, P${basePriority} → P${priority}.`);
+      reasons.push(`Race weekend is on, so ${input.location} moves up one level: P${basePriority} → P${priority}.`);
     } else {
-      reasons.push('Race weekend: already P1, the highest level.');
+      reasons.push('Race weekend is on, but this is already P1, the highest level.');
     }
   }
 

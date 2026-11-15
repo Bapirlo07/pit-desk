@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { formatAge, formatDateTime, nextActions, PROBLEM_THRESHOLD, type TriagedTicket } from '../triage';
+import { PRIORITY_HINT, PRIORITY_NAME, TYPE_LABEL } from '../labels';
 import { EscalationNote } from './EscalationNote';
 import { PriorityBadge } from './PriorityBadge';
 import { PriorityMatrix } from './PriorityMatrix';
@@ -15,7 +16,7 @@ interface Props {
   onDelete: () => void;
 }
 
-const USERS_TEXT = { '1': '1 user', '2-10': '2–10 users', '10+': '10+ users' };
+const USERS_TEXT = { '1': '1 person', '2-10': '2–10 people', '10+': 'More than 10' };
 const BLOCKED_TEXT = { yes: 'No, fully blocked', partly: 'Partly', no: 'Yes, mostly' };
 
 /** Ticket detail, shown in a native <dialog> (focus trap + Esc to close for free). */
@@ -57,7 +58,7 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
   const submitResolve = (e: FormEvent) => {
     e.preventDefault();
     if (!resolution.trim()) {
-      setError('Add a one-line resolution note.');
+      setError('Write a short note on what fixed it.');
       return;
     }
     onResolve(resolution.trim());
@@ -69,10 +70,12 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
         <PriorityBadge priority={t.priority.priority} large />
         <div className="drawer-heading">
           <h2 id="detail-title">
-            <span className="mono">{ticket.id}</span> · {t.classification.type}
+            {PRIORITY_NAME[t.priority.priority]} <span className="muted">({PRIORITY_HINT[t.priority.priority]})</span>
           </h2>
           <p className="muted">
-            {t.article.name} · {ticket.location} · logged {formatDateTime(ticket.createdAt)} ({formatAge(now - ticket.createdAt)} ago)
+            {TYPE_LABEL[t.classification.type]} · {t.article.name} · {ticket.location}
+            <br />
+            <span className="mono">{ticket.id}</span> · added {formatAge(now - ticket.createdAt)} ago ({formatDateTime(ticket.createdAt)})
           </p>
         </div>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Close ticket">✕</button>
@@ -81,7 +84,7 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
       <div className="drawer-body">
         {resolved ? (
           <div className="callout callout-ok">
-            <b>Resolved</b> {ticket.resolvedAt ? formatDateTime(ticket.resolvedAt) : ''}: {ticket.resolution}
+            <b>Fixed</b> {ticket.resolvedAt ? formatDateTime(ticket.resolvedAt) : ''}: {ticket.resolution}
           </div>
         ) : (
           <div className="next-step">
@@ -92,7 +95,7 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
 
         {problemCount && !resolved && (
           <div className="callout callout-warn" role="note">
-            <b>Possible underlying problem.</b> {problemCount} open {t.article.name} incidents (threshold {PROBLEM_THRESHOLD}).
+            <b>Several people have this problem.</b> {problemCount} {t.article.name} problems are open at once ({PROBLEM_THRESHOLD} or more means something bigger may be broken).
           </div>
         )}
 
@@ -129,13 +132,17 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
         </section>
 
         <section className="detail-section">
-          <h3>Still not fixed? Escalate</h3>
+          <h3>Still not fixed? Pass it on</h3>
+          <p className="muted small hint">Copies a ready-made summary for {t.article.escalateTo}. Paste it into your ticket system or an email.</p>
           <EscalationNote item={item} now={now} raceWeekend={raceWeekend} />
         </section>
 
         <section className="detail-section">
           <details className="why-details">
-            <summary>Why is this P{t.priority.priority}?</summary>
+            <summary>Why is this P{t.priority.priority} ({PRIORITY_NAME[t.priority.priority]})?</summary>
+            <p className="muted small hint">
+              Impact = how many people are affected. Urgency = how stuck they are. Together they pick a square in the grid.
+            </p>
             <div className="why">
               <PriorityMatrix result={t.priority} />
               <ul className="reasons">
@@ -144,9 +151,9 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
             </div>
             <p className="muted small">
               {t.classification.defaulted
-                ? 'No type keywords matched, so it is treated as an Incident (safe default).'
-                : `Type keywords: ${t.classification.matched.map((m) => `“${m}”`).join(', ')}.`}
-              {t.categoryMatched.length > 0 && ` Category keywords: ${t.categoryMatched.map((m) => `“${m}”`).join(', ')}.`}
+                ? 'No clue words found, so it is treated as something broken, to be safe.'
+                : `Clue words found: ${t.classification.matched.map((m) => `“${m}”`).join(', ')}.`}
+              {t.categoryMatched.length > 0 && ` Topic words: ${t.categoryMatched.map((m) => `“${m}”`).join(', ')}.`}
             </p>
           </details>
         </section>
@@ -160,26 +167,26 @@ function DetailBody({ item, now, raceWeekend, onClose, onToggleStep, onResolve, 
               id="resolution"
               autoFocus
               value={resolution}
-              placeholder="What fixed it? e.g. Reset password, user logged in"
+              placeholder="What fixed it? e.g. Reset the password, they can log in now"
               onChange={(e) => { setResolution(e.target.value); setError(''); }}
               aria-invalid={error ? true : undefined}
             />
-            <button type="submit" className="btn btn-primary">Resolve</button>
+            <button type="submit" className="btn btn-primary">Save</button>
             <button type="button" className="btn btn-ghost" onClick={() => setMode('idle')}>Cancel</button>
             {error && <p className="error full">{error}</p>}
           </form>
         ) : mode === 'deleting' ? (
           <div className="resolve-form">
-            <span>Delete {ticket.id} permanently?</span>
+            <span>Delete this ticket for good?</span>
             <button type="button" className="btn btn-danger" autoFocus onClick={onDelete}>Yes, delete</button>
             <button type="button" className="btn btn-ghost" onClick={() => setMode('idle')}>Cancel</button>
           </div>
         ) : (
           <>
             {resolved ? (
-              <button type="button" className="btn btn-secondary" onClick={onReopen}>Reopen</button>
+              <button type="button" className="btn btn-secondary" onClick={onReopen}>Not fixed? Reopen</button>
             ) : (
-              <button type="button" className="btn btn-primary" onClick={() => setMode('resolving')}>Mark resolved</button>
+              <button type="button" className="btn btn-primary" onClick={() => setMode('resolving')}>Mark as fixed</button>
             )}
             <button type="button" className="btn btn-ghost danger-text" onClick={() => setMode('deleting')}>Delete</button>
           </>

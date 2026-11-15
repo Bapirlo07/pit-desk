@@ -35,7 +35,7 @@ export function PriorityMatrix({ result }: { result: PriorityResult }) {
       </table>
       {result.upliftApplied && (
         <p className="uplift">
-          <span className="tag tag-accent">Race uplift</span> P{result.basePriority} → <b>P{result.priority}</b>
+          <span className="tag tag-accent">Race weekend boost</span> P{result.basePriority} → <b>P{result.priority}</b>
         </p>
       )}
     </div>

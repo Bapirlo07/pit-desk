@@ -54,7 +54,7 @@ export default function App() {
       <Header raceWeekend={raceWeekend} onToggleRaceWeekend={() => setRaceWeekend((r) => !r)} onLoadDemo={loadDemo} />
       <main className="layout">
         <TicketForm raceWeekend={raceWeekend} onSubmit={addTicket} />
-        <Queue queue={queue} now={now} onOpen={setSelectedId} onLoadDemo={loadDemo} />
+        <Queue queue={queue} now={now} onOpen={setSelectedId} onLoadDemo={loadDemo} raceWeekend={raceWeekend} />
       </main>
       <TicketDetail
         item={selected}
